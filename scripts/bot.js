@@ -105,7 +105,7 @@ module.exports = (robot) => {
     res.send(`${username} さん、こちらの問題を復習しましょう！\n${url}`);
   });
 
-    robot.respond(/review-list (\w+)$/i, async (res) => {
+    robot.respond(/reviewlist (\w+)$/i, async (res) => {
     const username = res.match[1];
     const user = await User.findOne({ where: { username } });
     if (!user) {
