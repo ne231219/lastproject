@@ -6,13 +6,14 @@ module.exports = (robot) => {
 
   robot.respond(/start (\w+)$/i, async (res) => {
     const username = res.match[1];
+    const now = Math.floor(Date.now() / 1000);
     res.send(`${username} さんの記録を開始します`);
 
     let user = await User.findOne({ where: { username } });
     if (!user) {
-      user = await User.create({ username, is_training: true });
+      user = await User.create({ username, is_training: true, start_time: now });
     } else {
-      await user.update({ is_training: true });
+      await user.update({ is_training: true, start_time: now  });
     }
   });
 
@@ -21,7 +22,14 @@ module.exports = (robot) => {
     const user = await User.findOne({ where: { username } });
     if (user) {
       await user.update({ is_training: false });
-      res.send(`${username} さんの測定を終了しました。お疲れ様でした！`);
+      const url = `https://kenkoooo.com/atcoder/atcoder-api/v3/user/submissions?user=${username}&from_second=${user.start_time}`;
+      const response = await fetch(url);
+      const submissions = await response.json();
+
+      const solved = submissions.filter(s => s.result === 'AC');
+      const message = `${username} さんの測定を終了しました。お疲れ様でした！\n解いた問題一覧:\n${uniqueProblems.join(', ')}`;
+      res.send(message);
+
     } else {
       res.send(`${username} さんは登録されていません。`);
     }
@@ -52,9 +60,10 @@ const sequelize = new Sequelize(DB_INFO, {
 
 const User = sequelize.define('users',
   {
-    id: { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
-    username: { type: Sequelize.STRING, allowNull: false, unique: true },
-    is_training: { type: Sequelize.BOOLEAN, defaultValue: false },
+    id: { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true },//ユーザー識別ID
+    username: { type: Sequelize.STRING, allowNull: false, unique: true },//Atcoderの名前
+    is_training: { type: Sequelize.BOOLEAN, defaultValue: false },//学習中か
+    start_time: { type: Sequelize.INTEGER, allowNull: true },//開始時間
   },
   {
     freezeTableName: true,
