@@ -6,7 +6,7 @@ module.exports = (robot) => {
 
   robot.respond(/start (\w+)$/i, async (res) => {
     const username = res.match[1];
-    const now = Math.floor(Date.now() / 1000);
+    const now = Math.floor(Date.now() / 1000) - 86400;
     res.send(`${username} さんの記録を開始します`);
 
     let user = await User.findOne({ where: { username } });
