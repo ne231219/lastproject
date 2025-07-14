@@ -27,7 +27,7 @@ module.exports = (robot) => {
       const submissions = await response.json();
 
       const solved = submissions.filter(s => s.result === 'AC');
-      const message = `${username} さんの測定を終了しました。お疲れ様でした！\n解いた問題一覧:\n${uniqueProblems.join(', ')}`;
+      const message = `${username} さんの測定を終了しました。お疲れ様でした！`;
       res.send(message);
 
     } else {
